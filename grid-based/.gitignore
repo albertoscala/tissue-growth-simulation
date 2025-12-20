@@ -1,0 +1,45 @@
+# =========================
+# Build artifacts (CMake)
+# =========================
+/build/
+/cmake-build-*/
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
+/Makefile
+
+# =========================
+# Compiled binaries
+# =========================
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.exe
+cellular_automata
+
+# =========================
+# Compiler dependency files
+# =========================
+*.d
+
+# =========================
+# Editor / OS junk
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Optional scripts output
+# =========================
+*.log
