@@ -22,6 +22,7 @@ CellularAutomata::CellularAutomata(
     gen = std::mt19937(rd());
 }
 
+//TODO: Rendere modulare la parte dove si refillano i nutrienti
 void CellularAutomata::diffuseNutrients()
 {
     // Init by copying the old grid
@@ -72,8 +73,6 @@ void CellularAutomata::diffuseNutrients()
 
 void CellularAutomata::updateCells()
 {
-    //TODO: Dividere in due funzioni UPDATE_STATE e MITOSIS
-
     // Init by copying the old grid
     std::array<std::array<CellState, GRID_SIZE>, GRID_SIZE> newCellGrid;
     std::copy(cellGrid.begin(), cellGrid.end(), newCellGrid.begin());
