@@ -1,83 +1,231 @@
-# Grid Based Cellular Automata
+# Grid-Based Cellular Automata (Nutrient-Driven Growth)
 
-## Rules
+A **2D grid-based cellular automata** written in modern C++, modeling **cell growth, quiescence, necrosis, and division** driven by a diffusing nutrient field.  
+The simulation is rendered in real time using **MiniFB**.
 
-### Nutrient Diffusion
+---
 
-Nutrients spread to neighbors (only direct neighbors: up, down, left, right)
+## Overview
 
-Constraints
-- Nutrient values must stay within bounds [0.0; 1.0]
-- Boundary cells act as nutrient sources
+The simulation consists of two coupled grids:
 
-<!--Add nutient source specification-->
+- **Cell Grid** — discrete cell states (Empty, Alive, Quiescent, Necrotic)
+- **Nutrient Grid** — continuous scalar field in the range **[0.0, 1.0]**
 
-### Nutrient Consumption
+At each simulation step:
 
-Consumption rates:
-- Alive cells consume nutrients at a high rate
-- Quiescent cells consume at a lower rate
-- Necrotic cells consume nothing
-- Empty cells consume nothing
+1. Nutrients diffuse across the grid
+2. Cells update their state based on local nutrient levels
+3. Alive cells may divide into neighboring empty cells
+4. The grid is rendered to a window
 
-Consumption happens after diffusion.
+The model is inspired by **tumor-like growth dynamics** and reaction-diffusion systems.
 
-### State Transitions
+---
 
-Cells react to their local environment.
+## Grid Configuration
 
-Define two thresholds:
-- divideThreshold
-- deathThreshold
+| Parameter | Value |
+|---------|-------|
+| Grid size | `512 × 512` |
+| Neighborhood | Von Neumann (up, down, left, right) |
+| Boundary condition | Nutrient source (fixed maximum) |
 
-#### Transitions
+---
+
+## Cell States
+
+```cpp
+enum class CellState {
+    Empty,
+    Alive,
+    Quiescent,
+    Necrotic
+};
+```
+
+| State | Description |
+|-----|------------|
+| **Empty** | No cell present |
+| **Alive** | Actively dividing, well-fed |
+| **Quiescent** | Alive but nutrient-limited |
+| **Necrotic** | Dead tissue (irreversible) |
+
+---
+
+## Nutrient Diffusion
+
+Nutrients spread through the grid via **discrete diffusion**.
+
+### Diffusion Rule
+
+For each non-boundary cell:
+
+```
+new_value = current + diffusionSpeed × (neighbor_average − current)
+```
+
+Only **direct neighbors** are considered:
+- Top
+- Left
+- Bottom
+- Right
+
+### Constraints
+
+- Nutrient values are clamped to **[0.0, 1.0]**
+- Boundary cells are continuously refilled to `MAX_NUTRIENT`
+- Diffusion is applied **before** cell updates
+
+---
+
+## State Transitions
+
+Cells react to the **local nutrient concentration** using two thresholds:
+
+- `divideThreshold`
+- `deathThreshold`
+
+### Transition Rules
 
 | Current State | Condition | New State |
-| --------------------------------------- |
-|Alive | nutrient < T_divide | Quiescent |
-| Quiescent | nutrient > T_divide | Alive |
-| Alive / Quiescent | nutrient < T_death | Necrotic |
+|--------------|----------|-----------|
+| Alive | nutrient < divideThreshold | Quiescent |
+| Quiescent | nutrient ≥ divideThreshold | Alive |
+| Quiescent | nutrient < deathThreshold | Necrotic |
+| Alive | nutrient < deathThreshold | Necrotic |
 | Necrotic | always | Necrotic |
+| Empty | always | Empty |
 
-- Necrotic cells never recover
-- Empty cells never change state on their own
+### Notes
 
-### Cell Division
+- Necrotic cells **never recover**
+- Empty cells **do not change state**
+- Only **Alive cells** are eligible for division
 
-Make the tumor grow.
+---
 
-When a Cell Can Divide
+## Cell Division (Mitosis)
 
-A cell divides only if:
-- State is Alive
-- Nutrient > divideThreshold
-- At least one neighboring cell is Empty
+Alive cells can divide stochastically.
 
-#### Division Steps
+### Division Conditions
 
-When division happens:
-- Choose one empty neighbor at random
-- Place a new Alive cell there
-- Reduce nutrient of the parent cell
+A cell may divide if:
 
-Constraints:
-- One division per cell per step
-- Division is stochastic (not deterministic)
+- State is **Alive**
+- Nutrient ≥ `divideThreshold`
+- At least one **neighboring cell is Empty**
 
-### Visualization Rules
+### Division Process
 
-| State | Color |
-|-----------|
+1. Collect all empty neighboring cells
+2. Choose **one at random**
+3. Place a new **Alive** cell there
+4. Reduce parent cell nutrient by `divideCost`
+
+### Constraints
+
+- Maximum **one division per cell per step**
+- Division is **probabilistic**, not deterministic
+- Nutrient cannot go below `0.0`
+
+---
+
+## Visualization
+
+Rendering is handled via **MiniFB** in real time.
+
+### Color Mapping
+
+| Cell State | Color |
+|-----------|------|
 | Empty | Black |
-| Alive | Bright green |
+| Alive | Bright Green |
 | Quiescent | Yellow |
-| Necrotic | Dark red |
+| Necrotic | Blue |
 
-<!--Nutrient field Blue heatmap (optional overlay)
+Cells fully override the nutrient field visually.
 
-Rules:
+---
 
-Cells override nutrient color
+## Simulation Builder
 
-Optional alpha blending for nutrients
--->
+The simulation uses a **builder pattern** for clean configuration:
+
+```cpp
+CellularAutomata sim =
+    SimulationBuilder(cells, nutrients)
+        .setDiffusionSpeed(0.08f)
+        .setDeathThreshold(0.18f)
+        .setDivideThreshold(0.58f)
+        .setDivisionCost(0.20f)
+        .build();
+```
+
+### Tunable Parameters
+
+| Parameter | Meaning |
+|--------|--------|
+| `diffusionSpeed` | Rate of nutrient diffusion |
+| `deathThreshold` | Nutrient level causing necrosis |
+| `divideThreshold` | Nutrient level required to divide |
+| `divideCost` | Nutrient lost during division |
+
+---
+
+## Initial Conditions
+
+Several initialization helpers are provided in `main.cpp`:
+
+- **Sparse random noise**
+- **Central disk**
+- **Multiple clusters**
+- **Small random cluster**
+
+Example:
+
+```cpp
+generate_sparse_noise(cells, nutrients, 0.002f, 0.8f);
+```
+
+---
+
+## Build Instructions
+
+### Compile
+
+```bash
+./comp.sh
+```
+
+### Run
+
+```bash
+./build/cellular_automata
+```
+
+Close the window to terminate the program.
+
+---
+
+## Dependencies
+
+- **C++17**
+- **MiniFB**
+
+---
+
+## Planned Extensions (TODO)
+
+- Custom diffusion models
+- Metabolic nutrient consumption
+- Nutrient visualization overlay
+- Multi-species cells
+- Performance optimizations (sparse updates)
+
+---
+
+## License
+
+MIT / Educational use
