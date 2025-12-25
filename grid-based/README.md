@@ -66,12 +66,12 @@ Constraints:
 
 ### Visualization Rules
 
-|State|Color|
+| State | Color |
 |-----------|
-|Empty|Black|
-|Alive|Bright green|
-|Quiescent|Yellow|
-|Necrotic|Dark red|
+| Empty | Black |
+| Alive | Bright green |
+| Quiescent | Yellow |
+| Necrotic | Dark red |
 
 <!--Nutrient field Blue heatmap (optional overlay)
 

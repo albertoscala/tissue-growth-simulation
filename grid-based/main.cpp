@@ -159,10 +159,10 @@ int main()
 
     CellularAutomata sim =
         SimulationBuilder(cells, nutrients)
-            .setDiffusionSpeed(0.01f)
-            .setDeathThreshold(0.22f)
-            .setDivideThreshold(0.62f)
-            .setDivisionCost(0.18f)
+            .setDiffusionSpeed(0.08f)
+            .setDeathThreshold(0.18f)
+            .setDivideThreshold(0.58f)
+            .setDivisionCost(0.2f)
             .build();
 
     for (uint64_t epoch=0;;epoch++)
