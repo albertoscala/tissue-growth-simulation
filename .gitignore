@@ -1,0 +1,59 @@
+# =========================
+# Build artifacts (CMake)
+# =========================
+/build/
+/cmake-build-*/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/*.ninja
+**/*.ninja_deps
+**/*.ninja_log
+
+# CMake presets (user-specific)
+CMakeUserPresets.json
+
+# =========================
+# Compiled objects & binaries
+# =========================
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.exe
+*.out
+
+# =========================
+# Compiler dependency files
+# =========================
+*.d
+
+# =========================
+# Editor / OS junk
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Logs & misc
+# =========================
+*.log
+
+# =========================
+# Safety: dependency build pollution
+# =========================
+external/**/build/
+external/**/CMakeFiles/
+external/**/CMakeCache.txt
