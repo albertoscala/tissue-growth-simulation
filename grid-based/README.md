@@ -36,7 +36,8 @@ The model is inspired by **tumor-like growth dynamics** and reaction-diffusion s
 ## Cell States
 
 ```cpp
-enum class CellState {
+enum class CellState
+{
     Empty,
     Alive,
     Quiescent,
