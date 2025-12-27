@@ -222,8 +222,7 @@ Close the window to terminate the program.
 - Custom diffusion models
 - Metabolic nutrient consumption
 - Nutrient visualization overlay
-- Multi-species cells
-- Performance optimizations (sparse updates)
+- Performance optimizations (minimizing copies)
 
 ---
 
