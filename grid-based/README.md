@@ -228,4 +228,4 @@ Close the window to terminate the program.
 
 ## License
 
-MIT / Educational use
+[MIT](https://choosealicense.com/licenses/mit/)
