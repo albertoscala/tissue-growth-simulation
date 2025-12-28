@@ -26,10 +26,9 @@ CellularAutomata::CellularAutomata(
 //TODO: Rendere modulare la parte dove si refillano i nutrienti
 void CellularAutomata::diffuseNutrients()
 {
-    // Init by copying the old grid
+    // Create the new state od the grid
     std::array<std::array<float, GRID_SIZE>, GRID_SIZE> newNutrientGrid;
-    std::copy(nutrientGrid.begin(), nutrientGrid.end(), newNutrientGrid.begin());
-
+    
     // Iterate only over inner cells
     for (int i = 1; i < GRID_SIZE - 1; i++)
     {
@@ -69,14 +68,13 @@ void CellularAutomata::diffuseNutrients()
         newNutrientGrid[i][GRID_SIZE - 1] = MAX_NUTRIENT;
     }
 
-    std::swap(nutrientGrid, newNutrientGrid);
+    this->nutrientGrid = std::move(newNutrientGrid);
 }
 
 void CellularAutomata::updateCells()
 {
-    // Init by copying the old grid
+    // Create cell grid for the new state
     std::array<std::array<CellState, GRID_SIZE>, GRID_SIZE> newCellGrid;
-    std::copy(cellGrid.begin(), cellGrid.end(), newCellGrid.begin());
 
     // Clear alive cells
     aliveCells.clear();
@@ -121,68 +119,69 @@ void CellularAutomata::updateCells()
         }    
     }
 
-    std::swap(cellGrid, newCellGrid);
+    this->cellGrid = std::move(newCellGrid);
 }
 
 void CellularAutomata::divideCells()
 {
-    // Init by copying the old grid
-    std::array<std::array<CellState, GRID_SIZE>, GRID_SIZE> newCellGrid;
-    std::copy(cellGrid.begin(), cellGrid.end(), newCellGrid.begin());
-
     // Mitosis
     // Iterate only over inner cells
     for (auto& cell : aliveCells)
     {
-        std::vector<Neighbor> availableNeighbors;
-        
+        std::array<Neighbor, 4> availableNeighbors;
+        int neighborCount = 0;
+
         // TOP NEIGHBOR
-        if (newCellGrid[cell.first - 1][cell.second] == CellState::Empty)
+        if (cellGrid[cell.first - 1][cell.second] == CellState::Empty)
         {
-            availableNeighbors.push_back(Neighbor::TOP);
+            availableNeighbors[neighborCount] = Neighbor::TOP;
+            neighborCount++;
         }
         // LEFT NEIGHBOR
-        if (newCellGrid[cell.first][cell.second - 1] == CellState::Empty)
+        if (cellGrid[cell.first][cell.second - 1] == CellState::Empty)
         {
-            availableNeighbors.push_back(Neighbor::LEFT);
+            availableNeighbors[neighborCount] = Neighbor::LEFT;
+            neighborCount++;
         }
         // BOTTOM NEIGHBOR
-        if (newCellGrid[cell.first + 1][cell.second] == CellState::Empty)
+        if (cellGrid[cell.first + 1][cell.second] == CellState::Empty)
         {
-            availableNeighbors.push_back(Neighbor::BOTTOM);
+            availableNeighbors[neighborCount] = Neighbor::BOTTOM;
+            neighborCount++;
         }
         // RIGHT NEIGHBOR
-        if (newCellGrid[cell.first][cell.second + 1] == CellState::Empty)
+        if (cellGrid[cell.first][cell.second + 1] == CellState::Empty)
         {
-            availableNeighbors.push_back(Neighbor::RIGHT);
+            availableNeighbors[neighborCount] = Neighbor::RIGHT;
+            neighborCount++;
         }
 
-        if (availableNeighbors.size() != 0)
-        {
-            // Distribution over valid indices
-            std::uniform_int_distribution<> dist(0, availableNeighbors.size() - 1);
+        if (neighborCount == 0)
+            continue;
 
-            Neighbor finalPos = availableNeighbors[dist(gen)];
-            switch (finalPos)
-            {
-                case Neighbor::TOP: 
-                    newCellGrid[cell.first-1][cell.second] = CellState::Alive;
-                    break;
-                case Neighbor::LEFT:
-                    newCellGrid[cell.first][cell.second-1] = CellState::Alive;
-                    break;
-                case Neighbor::BOTTOM:
-                    newCellGrid[cell.first+1][cell.second] = CellState::Alive;
-                    break;
-                case Neighbor::RIGHT: 
-                    newCellGrid[cell.first][cell.second+1] = CellState::Alive;
-                    break;
-            }
-            if ((nutrientGrid[cell.first][cell.second] -= divideCost) < MIN_NUTRIENT) nutrientGrid[cell.first][cell.second] = MIN_NUTRIENT;
+        // Distribution over valid indices
+        std::uniform_int_distribution<> dist(0, neighborCount - 1);
+
+        Neighbor finalPos = availableNeighbors[dist(gen)];
+        
+        switch (finalPos)
+        {
+            case Neighbor::TOP: 
+                cellGrid[cell.first-1][cell.second] = CellState::Alive;
+                break;
+            case Neighbor::LEFT:
+                cellGrid[cell.first][cell.second-1] = CellState::Alive;
+                break;
+            case Neighbor::BOTTOM:
+                cellGrid[cell.first+1][cell.second] = CellState::Alive;
+                break;
+            case Neighbor::RIGHT: 
+                cellGrid[cell.first][cell.second+1] = CellState::Alive;
+                break;
         }
+
+        if ((nutrientGrid[cell.first][cell.second] -= divideCost) < MIN_NUTRIENT) nutrientGrid[cell.first][cell.second] = MIN_NUTRIENT;
     }
-
-    std::swap(cellGrid, newCellGrid);
 }
 
 void CellularAutomata::step()

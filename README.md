@@ -3,6 +3,8 @@
 A **2D grid-based cellular automata** written in modern C++, modeling **cell growth, quiescence, necrosis, and division** driven by a diffusing nutrient field.  
 The simulation is rendered in real time using **MiniFB**.
 
+![Demo Simulation](demo.gif)
+
 ---
 
 ## Overview
