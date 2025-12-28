@@ -214,7 +214,7 @@ Close the window to terminate the program.
 
 ## Dependencies
 
-- **C++17**
+- **C++20**
 - **MiniFB**
 
 ---
